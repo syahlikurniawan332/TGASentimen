@@ -6,7 +6,7 @@
         <div class="p-1 rounded-lg group-hover:bg-blue-100 dark:group-hover:bg-blue-900 transition-colors duration-300">
           <img src="https://flowbite.com/docs/images/logo.svg" alt="Logo" class="h-8 w-8">
         </div>
-        <span class="text-xl font-bold bg-gradient-to-r from-blue-600 to-purple-600 bg-clip-text text-transparent dark:from-blue-400 dark:to-purple-400">Sentimen</span>
+        <span class="text-xl font-bold bg-gradient-to-r from-blue-600 to-purple-600 bg-clip-text text-transparent dark:from-blue-400 dark:to-purple-400">Sahli</span>
       </a>
 
       <!-- Right menu -->
