@@ -51,7 +51,7 @@
                   <p class="pl-1">atau drag and drop</p>
                 </div>
                 <p class="text-xs text-gray-500">
-                  CSV dengan kolom username, text, dan tokens (Maks. 2MB)
+                  CSV dengan kolom username dan text (Maks. 2MB)
                 </p>
               </div>
             </div>
@@ -77,9 +77,8 @@
               <table class="min-w-full divide-y divide-gray-200">
                 <thead class="bg-gray-50">
                   <tr>
-                    <th scope="col" class="px-4 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">Username</th>
-                    <th scope="col" class="px-4 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">Text</th>
-                    <th scope="col" class="px-4 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">Tokens</th>
+                    <th scope="col" class="px-4 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">USERNAME</th>
+                    <th scope="col" class="px-4 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">TEXT</th>
                   </tr>
                 </thead>
                 <tbody id="preview-table-body" class="bg-white divide-y divide-gray-200"></tbody>
@@ -202,56 +201,55 @@
 
       reader.onload = function(e) {
         const contents = e.target.result;
-        const lines = contents.split('\n').slice(0, 6); // Get header + 5 rows
+        const allLines = contents.split('\n');
+        const headerLine = allLines[0];
+        const dataLines = allLines.slice(1, 6); // Get up to 5 data rows
+        
+        // Parse header to find column indices
+        const headers = parseCSVLine(headerLine);
+        const usernameIndex = headers.findIndex(h => h.trim().toLowerCase() === 'username');
+        const textIndex = headers.findIndex(h => h.trim().toLowerCase() === 'text');
 
         // Clear previous preview
         previewTableBody.innerHTML = '';
 
-        // Skip header row and process data rows
-        for (let i = 1; i < lines.length; i++) {
-          if (!lines[i]) continue;
+        // Only show preview if we have the required columns
+        if (usernameIndex !== -1 && textIndex !== -1) {
+          // Process data rows
+          for (let i = 0; i < dataLines.length; i++) {
+            if (!dataLines[i]) continue;
 
-          const values = parseCSVLine(lines[i]);
-          if (values.length < 3) continue; // Skip if not enough columns
+            const values = parseCSVLine(dataLines[i]);
+            if (values.length <= Math.max(usernameIndex, textIndex)) continue;
 
-          const row = document.createElement('tr');
+            const row = document.createElement('tr');
 
-          // Username column
-          const usernameCell = document.createElement('td');
-          usernameCell.className = 'px-4 py-3 whitespace-nowrap text-sm text-gray-900';
-          usernameCell.textContent = values[0].trim();
-          row.appendChild(usernameCell);
+            // Username column
+            const usernameCell = document.createElement('td');
+            usernameCell.className = 'px-4 py-3 whitespace-nowrap text-sm text-gray-900';
+            usernameCell.textContent = values[usernameIndex].trim();
+            row.appendChild(usernameCell);
 
-          // Text column
-          const textCell = document.createElement('td');
-          textCell.className = 'px-4 py-3 text-sm text-gray-900';
-          textCell.textContent = values[1].trim();
-          row.appendChild(textCell);
+            // Text column
+            const textCell = document.createElement('td');
+            textCell.className = 'px-4 py-3 text-sm text-gray-900';
+            textCell.textContent = values[textIndex].trim();
+            row.appendChild(textCell);
 
-          // Tokens column
-          const tokensCell = document.createElement('td');
-          tokensCell.className = 'px-4 py-3 text-sm text-gray-900';
-
-          const tokensValue = values[2].trim();
-          if (tokensValue.startsWith('[') && tokensValue.endsWith(']')) {
-            try {
-              const tokens = JSON.parse(tokensValue);
-              tokensCell.innerHTML = tokens.map(t =>
-                `<span class="inline-block bg-blue-100 text-blue-800 text-xs font-medium mr-1 mb-1 px-2 py-0.5 rounded">${t}</span>`
-              ).join(' ');
-            } catch (e) {
-              tokensCell.textContent = tokensValue;
-            }
-          } else {
-            tokensCell.textContent = tokensValue;
+            previewTableBody.appendChild(row);
           }
 
-          row.appendChild(tokensCell);
-          previewTableBody.appendChild(row);
+          // Show preview
+          csvPreview.classList.remove('hidden');
+        } else {
+          alert('File CSV harus memiliki kolom "username" dan "text"');
+          filePreview.classList.add('hidden');
+          submitBtn.disabled = true;
         }
+      };
 
-        // Show preview
-        csvPreview.classList.remove('hidden');
+      reader.onerror = function() {
+        alert('Gagal membaca file');
       };
 
       reader.readAsText(file);
@@ -288,56 +286,3 @@
   });
 </script>
 @endsection
-
-
-<!-- <!DOCTYPE html>
-<html lang="id">
-<head>
-    <meta charset="UTF-8">
-    <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>Upload CSV Analisis Sentimen</title>
-    <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0/dist/css/bootstrap.min.css" rel="stylesheet">
-</head>
-<body class="bg-light">
-    <div class="container py-5">
-        <div class="row justify-content-center">
-            <div class="col-lg-8">
-                <div class="card shadow">
-                    <div class="card-header bg-primary text-white">
-                        <h4 class="mb-0">Upload File CSV</h4>
-                    </div>
-                    
-                    <div class="card-body">
-                        @if (session('error'))
-                        <div class="alert alert-danger">
-                            {{ session('error') }}
-                        </div>
-                        @endif
-
-                        <form method="POST" action="{{ route('processCsv') }}" enctype="multipart/form-data">
-                            @csrf
-                            
-                            <div class="mb-3">
-                                <label for="csv_file" class="form-label">Pilih File CSV:</label>
-                                <input type="file" class="form-control" name="csv_file" id="csv_file" required accept=".csv,.txt">
-                                <div class="form-text">
-                                    Format: CSV dengan kolom username dan text (Maks. 2MB)
-                                </div>
-                            </div>
-
-                            <div class="d-flex justify-content-between">
-                                <a href="{{ route('form') }}" class="btn btn-secondary">
-                                    Kembali
-                                </a>
-                                <button type="submit" class="btn btn-primary">
-                                    Proses Analisis
-                                </button>
-                            </div>
-                        </form>
-                    </div>
-                </div>
-            </div>
-        </div>
-    </div>
-</body>
-</html> -->

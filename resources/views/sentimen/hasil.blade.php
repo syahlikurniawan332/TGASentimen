@@ -1,329 +1,155 @@
 @extends('layouts.app')
 
 @section('content')
-<!DOCTYPE html>
-<html lang="id">
 
-<head>
-    <meta charset="UTF-8">
-    <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>Hasil Analisis Sentimen</title>
-    <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0/dist/css/bootstrap.min.css" rel="stylesheet">
-    <link href="https://cdn.jsdelivr.net/npm/bootstrap-icons@1.10.5/font/bootstrap-icons.css" rel="stylesheet">
-    <style>
-        .sentiment-card {
-            border-radius: 12px;
-            box-shadow: 0 4px 12px rgba(0, 0, 0, 0.1);
-            transition: transform 0.3s ease;
-            border: none;
-            overflow: hidden;
-        }
+<div class="container mx-auto px-4 py-8">
+    <!-- Header -->
+    <div class="bg-white rounded-lg shadow-md p-6 mb-6">
+        <div class="flex justify-between items-center">
+            <h1 class="text-2xl font-bold text-gray-800">Hasil Analisis Sentimen</h1>
+            <span class="bg-blue-100 text-blue-800 text-xs font-semibold px-2.5 py-0.5 rounded">ID: {{ $analisa_id }}</span>
+        </div>
+    </div>
 
-        .sentiment-card:hover {
-            transform: translateY(-5px);
-            box-shadow: 0 8px 20px rgba(0, 0, 0, 0.15);
-        }
+    <!-- Statistik -->
+    <div class="grid grid-cols-1 md:grid-cols-3 gap-4 mb-6">
+        <!-- Total Teks -->
+        <div class="bg-white rounded-lg shadow p-4">
+            <div class="flex justify-between">
+                <div>
+                    <p class="text-sm text-gray-500">Total Teks</p>
+                    <p class="text-2xl font-bold">{{ count($textLines) }}</p>
+                </div>
+                <div class="text-blue-500">
+                    <svg class="w-8 h-8" fill="currentColor" viewBox="0 0 20 20">
+                        <path d="M9 4h6v2H9V4zm0 4h6v2H9V8zm0 4h6v2H9v-2zM5 4h2v2H5V4zm0 4h2v2H5V8zm0 4h2v2H5v-2z" />
+                    </svg>
+                </div>
+            </div>
+        </div>
 
-        .sentiment-badge {
-            font-size: 1rem;
-            padding: 0.5rem 1rem;
-            border-radius: 50px;
-        }
+        <!-- Waktu Eksekusi Naive Bayes -->
+        <div class="bg-white rounded-lg shadow p-4">
+            <div class="flex justify-between">
+                <div>
+                    <p class="text-sm text-gray-500">Waktu NB</p>
+                    <p class="text-2xl font-bold">{{ number_format($metrics['execution_time']['NaiveBayes'] ?? 0, 2) }} ms</p>
+                </div>
+                <div class="text-green-500">
+                    <svg class="w-8 h-8" fill="currentColor" viewBox="0 0 20 20">
+                        <path fill-rule="evenodd" d="M10 18a8 8 0 100-16 8 8 0 000 16zm1-12a1 1 0 10-2 0v4a1 1 0 00.293.707l2.828 2.829a1 1 0 101.415-1.415L11 9.586V6z" clip-rule="evenodd" />
+                    </svg>
+                </div>
+            </div>
+        </div>
 
-        .text-preview {
-            background-color: #f8f9fa;
-            border-left: 4px solid #0d6efd;
-            padding: 1rem;
-            border-radius: 4px;
-            white-space: pre-wrap;
-        }
-
-        .chart-container {
-            background: white;
-            border-radius: 12px;
-            padding: 1.5rem;
-            box-shadow: 0 2px 8px rgba(0, 0, 0, 0.05);
-        }
-
-        .accuracy-meter {
-            height: 8px;
-            border-radius: 4px;
-            overflow: hidden;
-        }
-
-        .method-card .card-header {
-            font-weight: 600;
-            letter-spacing: 0.5px;
-        }
-
-        .stat-card {
-            border-radius: 10px;
-            border: 1px solid rgba(0, 0, 0, 0.05);
-        }
-
-        .stat-value {
-            font-size: 1.5rem;
-            font-weight: 700;
-        }
-    </style>
-</head>
-
-<body class="bg-light">
-    <div class="container py-4">
-        <div class="row justify-content-center">
-            <div class="col-lg-10">
-                <!-- Header Card -->
-                <div class="card sentiment-card mb-4">
-                    <div class="card-header bg-primary text-white py-3">
-                        <div class="d-flex justify-content-between align-items-center">
-                            <h4 class="mb-0"><i class="bi bi-graph-up me-2"></i>Hasil Analisis Sentimen</h4>
-                            <span class="badge bg-white text-primary">ID: {{ $analisa_id }}</span>
-                        </div>
-                    </div>
-
-                    <div class="card-body">
-                        @if ($result['status'] === 'success')
-                        <!-- Summary Stats -->
-                        <div class="row mb-4">
-                            <div class="col-md-4 mb-3">
-                                <div class="stat-card p-3 bg-white">
-                                    <div class="d-flex justify-content-between">
-                                        <div>
-                                            <h6 class="text-muted mb-1">Total Teks</h6>
-                                            <h3 class="stat-value text-primary">{{ count($textLines) }}</h3>
-                                        </div>
-                                        <i class="bi bi-text-paragraph text-primary" style="font-size: 2rem;"></i>
-                                    </div>
-                                </div>
-                            </div>
-
-                            <div class="col-md-4 mb-3">
-                                <div class="stat-card p-3 bg-white">
-                                    <div class="d-flex justify-content-between">
-                                        <div>
-                                            <h6 class="text-muted mb-1">Akurasi NB</h6>
-                                            <h3 class="stat-value text-success">
-                                                {{ round($result['accuracy']['NaiveBayes'] * 100, 1) }}%
-                                            </h3>
-                                        </div>
-                                        <i class="bi bi-check-circle text-success" style="font-size: 2rem;"></i>
-                                    </div>
-                                </div>
-                            </div>
-
-                            <div class="col-md-4 mb-3">
-                                <div class="stat-card p-3 bg-white">
-                                    <div class="d-flex justify-content-between">
-                                        <div>
-                                            <h6 class="text-muted mb-1">Akurasi KNN</h6>
-                                            <h3 class="stat-value text-info">
-                                                {{ round($result['accuracy']['KNN'] * 100, 1) }}%
-                                            </h3>
-                                        </div>
-                                        <i class="bi bi-check-circle text-info" style="font-size: 2rem;"></i>
-                                    </div>
-                                </div>
-                            </div>
-                        </div>
-
-                        <!-- Multi-Text Analysis -->
-                        @if(count($textLines) > 1)
-                        <div class="alert alert-primary d-flex align-items-center">
-                            <i class="bi bi-info-circle-fill me-2"></i>
-                            <div>
-                                <strong>Analisis Multi-Teks!</strong> Berikut hasil analisis {{ count($textLines) }} teks yang Anda masukkan.
-                            </div>
-                        </div>
-
-                        <div class="table-responsive mb-4">
-                            <table class="table table-striped">
-                                <thead class="table-dark">
-                                    <tr>
-                                        <th>#</th>
-                                        <th>Teks Asli</th>
-                                        <th class="text-center">Naive Bayes</th>
-                                        <th class="text-center">KNN</th>
-                                    </tr>
-                                </thead>
-                                <tbody>
-                                    @foreach($result['results'] as $index => $item)
-                                    <tr>
-                                        <td>{{ $index + 1 }}</td>
-                                        <td>{{ trim($item['text'], '"') }}</td>
-                                        <td class="text-center">
-                                            <span class="badge bg-{{ $item['NaiveBayes']['prediction'] === 'positif' ? 'success' : 'danger' }}">
-                                                {{ ucfirst($item['NaiveBayes']['prediction']) }} {{ $item['NaiveBayes']['emoji'] }}
-                                            </span>
-                                        </td>
-                                        <td class="text-center">
-                                            <span class="badge bg-{{ $item['KNN']['prediction'] === 'positif' ? 'success' : 'danger' }}">
-                                                {{ ucfirst($item['KNN']['prediction']) }} {{ $item['KNN']['emoji'] }}
-                                            </span>
-                                        </td>
-                                    </tr>
-                                    @endforeach
-                                </tbody>
-                            </table>
-                        </div>
-
-                        <!-- Single Text Analysis -->
-                        @else
-                        <div class="mb-4">
-                            <h5 class="fw-bold mb-3"><i class="bi bi-chat-square-text me-2"></i>Teks yang Dianalisis</h5>
-                            <div class="text-preview p-3">
-                                {{ $textLines[0] }}
-                            </div>
-                        </div>
-
-                        <div class="row mb-4">
-                            <div class="col-md-6 mb-3">
-                                <div class="card method-card h-100">
-                                    <div class="card-header bg-success text-white">
-                                        <i class="bi bi-diagram-2 me-2"></i> Naive Bayes
-                                    </div>
-                                    <div class="card-body text-center py-4">
-                                        @php
-                                        $nb = $all_nb_predictions[0] ?? null;
-                                        $nbEmoji = $nb === 'Positif' ? '😊' : '😞';
-                                        @endphp
-
-                                        @if($nb)
-                                        <div class="mb-3">
-                                            <span class="sentiment-badge bg-{{ $nb === 'Positif' ? 'success' : 'danger' }}" style="font-size: 1.2rem;">
-                                                {{ $nb }} {{ $nbEmoji }}
-                                            </span>
-                                        </div>
-
-                                        <div class="d-flex justify-content-between small text-muted mb-2">
-                                            <span>Akurasi</span>
-                                            <span>{{ round($result['accuracy']['NaiveBayes'] * 100, 1) }}%</span>
-                                        </div>
-                                        <div class="accuracy-meter bg-light mb-3">
-                                            <div class="bg-success" style="height: 100%; width: {{ $result['accuracy']['NaiveBayes'] * 100 }}%"></div>
-                                        </div>
-                                        @else
-                                        <div class="text-muted">Tidak ada hasil</div>
-                                        @endif
-                                    </div>
-                                </div>
-                            </div>
-
-                            <div class="col-md-6 mb-3">
-                                <div class="card method-card h-100">
-                                    <div class="card-header bg-info text-white">
-                                        <i class="bi bi-diagram-3 me-2"></i> K-Nearest Neighbors
-                                    </div>
-                                    <div class="card-body text-center py-4">
-                                        @php
-                                        $knn = $all_knn_predictions[0] ?? null;
-                                        $knnEmoji = $knn === 'positif' ? '😊' : '😞';
-                                        @endphp
-
-                                        @if($knn)
-                                        <div class="mb-3">
-                                            <span class="sentiment-badge bg-{{ $knn === 'positif' ? 'success' : 'danger' }}" style="font-size: 1.2rem;">
-                                                {{ $knn }} {{ $knnEmoji }}
-                                            </span>
-                                        </div>
-
-                                        <div class="d-flex justify-content-between small text-muted mb-2">
-                                            <span>Akurasi</span>
-                                            <span>{{ round($result['accuracy']['KNN'] * 100, 1) }}%</span>
-                                        </div>
-                                        <div class="accuracy-meter bg-light mb-3">
-                                            <div class="bg-info" style="height: 100%; width: {{ $result['accuracy']['KNN'] * 100 }}%"></div>
-                                        </div>
-                                        @else
-                                        <div class="text-muted">Tidak ada hasil</div>
-                                        @endif
-                                    </div>
-                                </div>
-                            </div>
-                        </div>
-                        @endif
-
-                        <!-- Visualization -->
-                        <div class="chart-container mb-4">
-                            <h5 class="fw-bold mb-3"><i class="bi bi-pie-chart me-2"></i>Visualisasi Hasil</h5>
-                            @if(isset($chart_base64))
-                            <div class="text-center">
-                                <img src="data:image/png;base64,{{ $chart_base64 }}" class="img-fluid" style="max-height: 400px;" alt="Chart Analisis Sentimen">
-                                <p class="text-muted small mt-2">Distribusi sentimen berdasarkan kedua metode analisis</p>
-                            </div>
-                            @else
-                            <div class="alert alert-warning">Visualisasi tidak tersedia</div>
-                            @endif
-                        </div>
-
-                        <!-- Sentiment Distribution -->
-                        <div class="card mb-4">
-                            <div class="card-header bg-secondary text-white">
-                                <i class="bi bi-bar-chart me-2"></i> Statistik Sentimen
-                            </div>
-                            <div class="card-body">
-                                <div class="row">
-                                    <div class="col-md-6">
-                                        <h6 class="fw-bold text-success">Naive Bayes</h6>
-                                        <ul class="list-group list-group-flush">
-                                            <li class="list-group-item d-flex justify-content-between align-items-center">
-                                                Positif
-                                                <span class="badge bg-success rounded-pill">
-                                                    {{ $result['sentiment_distribution']['NaiveBayes']['Positif'] ?? 0 }}
-                                                </span>
-                                            </li>
-                                            <li class="list-group-item d-flex justify-content-between align-items-center">
-                                                Negatif
-                                                <span class="badge bg-danger rounded-pill">
-                                                    {{ $result['sentiment_distribution']['NaiveBayes']['Negatif'] ?? 0 }}
-                                                </span>
-                                            </li>
-                                        </ul>
-                                    </div>
-                                    <div class="col-md-6">
-                                        <h6 class="fw-bold text-info">KNN</h6>
-                                        <ul class="list-group list-group-flush">
-                                            <li class="list-group-item d-flex justify-content-between align-items-center">
-                                                Positif
-                                                <span class="badge bg-success rounded-pill">
-                                                    {{ $result['sentiment_distribution']['KNN']['Positif'] ?? 0 }}
-                                                </span>
-                                            </li>
-                                            <li class="list-group-item d-flex justify-content-between align-items-center">
-                                                Negatif
-                                                <span class="badge bg-danger rounded-pill">
-                                                    {{ $result['sentiment_distribution']['KNN']['Negatif'] ?? 0 }}
-                                                </span>
-                                            </li>
-                                        </ul>
-                                    </div>
-                                </div>
-                            </div>
-                        </div>
-
-                        @else
-                        <div class="alert alert-danger">
-                            <i class="bi bi-exclamation-triangle-fill me-2"></i>
-                            {{ $result['message'] ?? 'Terjadi kesalahan dalam analisis' }}
-                        </div>
-                        @endif
-
-                        <div class="d-grid gap-2 d-md-flex justify-content-md-end mt-4">
-                            <a href="{{ route('form') }}" class="btn btn-outline-primary">
-                                <i class="bi bi-arrow-left-circle me-2"></i>Kembali
-                            </a>
-                            <button class="btn btn-primary" onclick="window.print()">
-                                <i class="bi bi-printer me-2"></i>Cetak Hasil
-                            </button>
-                        </div>
-                    </div>
+        <!-- Waktu Eksekusi KNN -->
+        <div class="bg-white rounded-lg shadow p-4">
+            <div class="flex justify-between">
+                <div>
+                    <p class="text-sm text-gray-500">Waktu KNN</p>
+                    <p class="text-2xl font-bold">{{ number_format($metrics['execution_time']['KNN'] ?? 0, 2) }} ms</p>
+                </div>
+                <div class="text-purple-500">
+                    <svg class="w-8 h-8" fill="currentColor" viewBox="0 0 20 20">
+                        <path fill-rule="evenodd" d="M10 18a8 8 0 100-16 8 8 0 000 16zm1-12a1 1 0 10-2 0v4a1 1 0 00.293.707l2.828 2.829a1 1 0 101.415-1.415L11 9.586V6z" clip-rule="evenodd" />
+                    </svg>
                 </div>
             </div>
         </div>
     </div>
 
-    <script src="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0/dist/js/bootstrap.bundle.min.js"></script>
-</body>
+    <!-- Visualisasi -->
+    <div class="grid grid-cols-1 md:grid-cols-2 gap-6 mb-6">
+        <!-- Pie Chart -->
+        @if(isset($visualizations['pie_chart']))
+        <div class="bg-white rounded-lg shadow-md p-6">
+            <h2 class="text-xl font-semibold mb-4">Distribusi Sentimen</h2>
+            <div class="flex justify-center">
+                <img src="data:image/png;base64,{{ $visualizations['pie_chart'] }}" alt="Pie Chart Sentimen" class="max-w-full h-auto">
+            </div>
+        </div>
+        @endif
 
-</html>
+        <!-- Word Cloud Original -->
+        @if(isset($visualizations['wordcloud_original']))
+        <div class="bg-white rounded-lg shadow-md p-6">
+            <h2 class="text-xl font-semibold mb-4">Word Cloud Teks Asli</h2>
+            <div class="flex justify-center">
+                <img src="data:image/png;base64,{{ $visualizations['wordcloud_original'] }}" alt="Word Cloud Original" class="max-w-full h-auto">
+            </div>
+        </div>
+        @endif
+    </div>
+
+    <!-- Word Frequency -->
+    @if(isset($visualizations['word_frequency']))
+    <div class="bg-white rounded-lg shadow-md p-6 mb-6">
+        <h2 class="text-xl font-semibold mb-4">Frekuensi Kata</h2>
+        <div class="grid grid-cols-1 md:grid-cols-2 gap-4">
+            <div>
+                <h3 class="font-medium text-center mb-2">Naive Bayes</h3>
+                <img src="data:image/png;base64,{{ $visualizations['word_frequency']['NaiveBayes'] }}" alt="Word Frequency NB" class="max-w-full h-auto">
+            </div>
+            <div>
+                <h3 class="font-medium text-center mb-2">KNN</h3>
+                <img src="data:image/png;base64,{{ $visualizations['word_frequency']['KNN'] }}" alt="Word Frequency KNN" class="max-w-full h-auto">
+            </div>
+        </div>
+    </div>
+    @endif
+
+    <!-- Hasil Analisis -->
+    <div class="bg-white rounded-lg shadow-md overflow-hidden mb-6">
+        <div class="px-6 py-4 border-b border-gray-200">
+            <h2 class="text-xl font-semibold">Detail Analisis</h2>
+        </div>
+        <div class="overflow-x-auto">
+            <table class="min-w-full divide-y divide-gray-200">
+                <thead class="bg-gray-50">
+                    <tr>
+                        <th class="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">#</th>
+                        <th class="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">Teks</th>
+                        <th class="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">Naive Bayes</th>
+                        <th class="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">KNN</th>
+                    </tr>
+                </thead>
+                <!-- Di bagian tabel hasil, ganti $predictions dengan $result['results'] -->
+                <tbody class="bg-white divide-y divide-gray-200">
+                    @foreach($result['results'] as $index => $item)
+                    <tr>
+                        <td class="px-6 py-4 whitespace-nowrap">{{ $index + 1 }}</td>
+                        <td class="px-6 py-4">{{ $item['text'] }}</td>
+                        <td class="px-6 py-4">
+                            <div class="flex items-center">
+                                <span class="inline-block w-6 text-center">{{ $item['predictions']['NaiveBayes']['emoji'] }}</span>
+                                <span class="ml-2 capitalize">{{ $item['predictions']['NaiveBayes']['prediction'] }}</span>
+                                <span class="ml-2 text-xs text-gray-500">{{ round($item['predictions']['NaiveBayes']['confidence'] * 100, 1) }}%</span>
+                            </div>
+                        </td>
+                        <td class="px-6 py-4">
+                            <div class="flex items-center">
+                                <span class="inline-block w-6 text-center">{{ $item['predictions']['KNN']['emoji'] }}</span>
+                                <span class="ml-2 capitalize">{{ $item['predictions']['KNN']['prediction'] }}</span>
+                                <span class="ml-2 text-xs text-gray-500">{{ round($item['predictions']['KNN']['confidence'] * 100, 1) }}%</span>
+                            </div>
+                        </td>
+                    </tr>
+                    @endforeach
+                </tbody>
+            </table>
+        </div>
+    </div>
+
+    <!-- Tombol Aksi -->
+    <div class="flex justify-end space-x-4">
+        <a href="{{ route('form') }}" class="inline-flex items-center px-4 py-2 border border-gray-300 shadow-sm text-sm font-medium rounded-md text-gray-700 bg-white hover:bg-gray-50 focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-blue-500">
+            Kembali
+        </a>
+        <button onclick="window.print()" class="inline-flex items-center px-4 py-2 border border-transparent text-sm font-medium rounded-md shadow-sm text-white bg-blue-600 hover:bg-blue-700 focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-blue-500">
+            Cetak Hasil
+        </button>
+    </div>
+</div>
 
 @endsection

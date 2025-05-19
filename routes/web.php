@@ -2,6 +2,7 @@
 
 use Illuminate\Support\Facades\Route;
 use App\Http\Controllers\SentimentController;
+use App\Http\Controllers\TextHandleController;
 use Illuminate\Http\Request;
 
 Route::get('/test', function () {

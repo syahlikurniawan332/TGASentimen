@@ -9,6 +9,7 @@ use Illuminate\Http\Request;
 use Illuminate\Support\Facades\Http;
 use Illuminate\Support\Facades\Log;
 use Illuminate\Support\Facades\Storage;
+use Illuminate\Support\Str;
 
 class SentimentController extends Controller
 {
@@ -34,7 +35,6 @@ class SentimentController extends Controller
                 $textLines = [trim($request->text)];
             }
 
-            // Kirim ke API Flask
             $response = Http::post($this->apiUrl, ['texts' => $textLines]);
 
             if (!$response->successful()) {
@@ -43,16 +43,56 @@ class SentimentController extends Controller
 
             $result = $response->json();
 
-            // Debug: Lihat struktur response
-            // Log::debug('API Response:', $result);
+            // Simpan ke database sesuai kode asli
+            $analisa = AnalisaData::create([
+                'tipe_fitur' => 'text', // Diubah dari AnalisaData::TIPE_TEKS
+                'nama_file' => 'input_text',
+                'waktu_analisis' => now()
+            ]);
 
-            // Pastikan data dikirim ke view dengan format benar
+            foreach ($result['results'] as $index => $item) {
+                DetailSentimen::create([
+                    'analisa_id' => $analisa->id,
+                    'text_asli' => $textLines[$index] ?? '',
+                    'text_bersih' => $item['cleaned_text'] ?? '',
+                    'nb_prediksi' => $item['predictions']['NaiveBayes']['prediction'] ?? null,
+                    'knn_prediksi' => $item['predictions']['KNN']['prediction'] ?? null,
+                    'nb_confidence' => $item['predictions']['NaiveBayes']['confidence'] ?? null,
+                    'knn_confidence' => $item['predictions']['KNN']['confidence'] ?? null
+                ]);
+            }
+
+            // Simpan hasil akurasi sesuai kode asli
+            if (isset($result['metrics']['accuracy'])) {
+                HasilAkurasi::simpanHasil(
+                    $analisa->id,
+                    [
+                        'akurasi' => $result['metrics']['accuracy']['NaiveBayes'] ?? null,
+                        'confusion_matrix' => isset($result['metrics']['confusion_matrix']['NaiveBayes']) ?
+                            json_encode($result['metrics']['confusion_matrix']['NaiveBayes']) : null,
+                        'waktu_eksekusi' => $result['metrics']['execution_time']['NaiveBayes'] ?? 0
+                    ],
+                    [
+                        'akurasi' => $result['metrics']['accuracy']['KNN'] ?? null,
+                        'confusion_matrix' => isset($result['metrics']['confusion_matrix']['KNN']) ?
+                            json_encode($result['metrics']['confusion_matrix']['KNN']) : null,
+                        'waktu_eksekusi' => $result['metrics']['execution_time']['KNN'] ?? 0
+                    ]
+                );
+            }
+
             return view('sentimen.hasil', [
                 'result' => $result,
                 'textLines' => $textLines,
-                'analisa_id' => rand(1000, 9999), // Contoh ID
-                'chart_base64' => $result['pie_chart'] ?? null,
-                'sentiment_distribution' => $result['sentiment_distribution'] ?? null
+                'analisa_id' => $analisa->id,
+                'chart_base64' => $result['visualizations']['pie_chart'] ?? null,
+                'sentiment_distribution' => $result['metrics']['sentiment_distribution'] ?? null,
+                'execution_time' => [
+                    'NaiveBayes' => $result['metrics']['execution_time']['NaiveBayes'] ?? 0,
+                    'KNN' => $result['metrics']['execution_time']['KNN'] ?? 0
+                ],
+                'visualizations' => $result['visualizations'] ?? [],
+                'predictions' => $result['results'] // Tambahkan ini
             ]);
         } catch (\Exception $e) {
             Log::error('Error predicting text: ' . $e->getMessage());
@@ -90,9 +130,9 @@ class SentimentController extends Controller
                 throw new \Exception('Invalid API response format');
             }
 
-            // Simpan ke database
+            // Simpan ke database sesuai kode asli
             $analisa = AnalisaData::create([
-                'tipe_fitur' => AnalisaData::TIPE_FILE,
+                'tipe_fitur' => 'file', // Diubah dari AnalisaData::TIPE_FILE
                 'nama_file' => $file->getClientOriginalName(),
                 'waktu_analisis' => now()
             ]);
@@ -104,93 +144,70 @@ class SentimentController extends Controller
                     'username' => $item['username'] ?? 'unknown',
                     'text_asli' => $item['text'],
                     'text_bersih' => $item['cleaned_text'],
-                    'nb_prediksi' => $item['NaiveBayes']['prediction'],
-                    'knn_prediksi' => $item['KNN']['prediction']
+                    'nb_prediksi' => $item['predictions']['NaiveBayes']['prediction'],
+                    'knn_prediksi' => $item['predictions']['KNN']['prediction'],
+                    'nb_confidence' => $item['predictions']['NaiveBayes']['confidence'] ?? null,
+                    'knn_confidence' => $item['predictions']['KNN']['confidence'] ?? null
                 ]);
             }
 
-            // Simpan hasil akurasi
-            HasilAkurasi::simpanHasil(
-                $analisa->id,
-                [
-                    'akurasi' => $result['accuracy']['NaiveBayes'],
-                    'confusion_matrix' => $result['confusion_matrix'],
-                    'waktu_eksekusi' => $result['execution_time_ms']['NaiveBayes']
-                ],
-                [
-                    'akurasi' => $result['accuracy']['KNN'],
-                    'confusion_matrix' => $result['confusion_matrix'],
-                    'waktu_eksekusi' => $result['execution_time_ms']['KNN']
-                ]
-            );
+            // Simpan hasil akurasi sesuai kode asli
+            if (isset($result['metrics']['accuracy'])) {
+                HasilAkurasi::simpanHasil(
+                    $analisa->id,
+                    [
+                        'akurasi' => $result['metrics']['accuracy']['NaiveBayes'] ?? null,
+                        'confusion_matrix' => isset($result['metrics']['confusion_matrix']['NaiveBayes']) ?
+                            json_encode($result['metrics']['confusion_matrix']['NaiveBayes']) : null,
+                        'waktu_eksekusi' => $result['metrics']['execution_time']['NaiveBayes'] ?? 0
+                    ],
+                    [
+                        'akurasi' => $result['metrics']['accuracy']['KNN'] ?? null,
+                        'confusion_matrix' => isset($result['metrics']['confusion_matrix']['KNN']) ?
+                            json_encode($result['metrics']['confusion_matrix']['KNN']) : null,
+                        'waktu_eksekusi' => $result['metrics']['execution_time']['KNN'] ?? 0
+                    ]
+                );
+            }
 
             $processed = $this->processApiResults($result);
             $downloadUrl = $this->generateResultsCsv($result['results'] ?? []);
+
+            // Tambahkan penanganan word frequency
+            $wordFrequency = [
+                'NaiveBayes' => $result['visualizations']['word_frequency']['NaiveBayes'] ?? null,
+                'KNN' => $result['visualizations']['word_frequency']['KNN'] ?? null,
+                'raw_data' => $result['visualizations']['word_frequency']['raw_data'] ?? null
+            ];
+
+            // Tambahkan penanganan classification reports
+            $classificationReports = [
+                'NaiveBayes' => $result['visualizations']['classification_reports']['NaiveBayes'] ?? null,
+                'KNN' => $result['visualizations']['classification_reports']['KNN'] ?? null
+            ];
 
             return view('sentimen.hasil_csv', [
                 'result' => $result,
                 'displayData' => $processed['displayData'],
                 'totalData' => $processed['totalData'],
-                'sentimentDistribution' => $result['sentiment_distribution'],
-                'accuracy' => $result['accuracy'],
-                'pieChart' => $result['pie_chart'],
+                'sentimentDistribution' => $result['metrics']['sentiment_distribution'] ?? null,
+                'accuracy' => $result['metrics']['accuracy'] ?? null,
+                'wordFrequency' => $wordFrequency,
+                'pieChart' => $result['visualizations']['pie_chart'] ?? null,
                 'analisa_id' => $analisa->id,
-                'downloadUrl' => $downloadUrl 
+                'downloadUrl' => $downloadUrl,
+                'visualizations' => $result['visualizations'] ?? [],
+                'executionTime' => [
+                    'NaiveBayes' => $result['metrics']['execution_time']['NaiveBayes'] ?? 0,
+                    'KNN' => $result['metrics']['execution_time']['KNN'] ?? 0
+                ],
+                'classificationReports' => $classificationReports
             ]);
         } catch (\Exception $e) {
             Log::error('Error processing CSV: ' . $e->getMessage());
             return back()->with('error', 'Error processing file: ' . $e->getMessage());
         }
     }
-
-    /**
-     * Save analysis results to database
-     */
-    protected function saveAnalysisResults(array $apiResult, array $textLines): AnalisaData
-    {
-        $analisa = AnalisaData::create([
-            'tipe_fitur' => 'file',
-            'nama_file' => 'book.csv',
-            'waktu_analisis' => now()
-        ]);
-
-        // Simpan detail sentimen
-        foreach ($apiResult['results'] as $result) {
-            // Handle NaN values
-            $text = is_numeric($result['text']) && is_nan($result['text']) ? '' : ($result['text'] ?? '');
-
-            DetailSentimen::create([
-                'analisa_id' => $analisa->id,
-                'text_asli' => $text,
-                'text_bersih' => $result['cleaned_text'] ?? '',
-                'nb_prediksi' => $result['NaiveBayes']['prediction'] ?? null,
-                'knn_prediksi' => $result['KNN']['prediction'] ?? null,
-            ]);
-        }
-
-        // Simpan hasil akurasi
-        if (isset($apiResult['accuracy'])) {
-            HasilAkurasi::simpanHasil(
-                $analisa->id,
-                [
-                    'akurasi' => $apiResult['accuracy']['NaiveBayes'] ?? 0,
-                    'confusion_matrix' => json_encode($apiResult['confusion_matrix']['matrix'] ?? []),
-                    'waktu_eksekusi' => $apiResult['execution_time_ms']['NaiveBayes'] ?? 0
-                ],
-                [
-                    'akurasi' => $apiResult['accuracy']['KNN'] ?? 0,
-                    'confusion_matrix' => json_encode($apiResult['confusion_matrix']['matrix'] ?? []),
-                    'waktu_eksekusi' => $apiResult['execution_time_ms']['KNN'] ?? 0
-                ]
-            );
-        }
-
-        return $analisa;
-    }
-
-    /**
-     * Process API results for CSV response
-     */
 
     protected function processApiResults(array $apiResult): array
     {
@@ -224,10 +241,12 @@ class SentimentController extends Controller
                     'username' => $row['username'] ?? '',
                     'text' => $row['text'] ?? '',
                     'cleaned_text' => $row['cleaned_text'] ?? '',
-                    'nb_prediction' => $row['NaiveBayes']['prediction'] ?? '',
-                    'knn_prediction' => $row['KNN']['prediction'] ?? '',
-                    'nb_emoji' => $row['NaiveBayes']['emoji'] ?? '',
-                    'knn_emoji' => $row['KNN']['emoji'] ?? ''
+                    'nb_prediction' => $row['predictions']['NaiveBayes']['prediction'] ?? '',
+                    'knn_prediction' => $row['predictions']['KNN']['prediction'] ?? '',
+                    'nb_emoji' => $row['predictions']['NaiveBayes']['emoji'] ?? '',
+                    'knn_emoji' => $row['predictions']['KNN']['emoji'] ?? '',
+                    'nb_confidence' => $row['predictions']['NaiveBayes']['confidence'] ?? null,
+                    'knn_confidence' => $row['predictions']['KNN']['confidence'] ?? null
                 ];
             }
 
@@ -237,10 +256,10 @@ class SentimentController extends Controller
                 'totalData' => $totalData,
                 'result' => [
                     'status' => $apiResult['status'],
-                    'stats' => $apiResult['sentiment_distribution'] ?? $defaultResponse['result']['stats'],
-                    'accuracy' => $apiResult['accuracy'] ?? null,
-                    'confusion_matrix' => $apiResult['confusion_matrix'] ?? null,
-                    'pie_chart' => $apiResult['pie_chart'] ?? null
+                    'stats' => $apiResult['metrics']['sentiment_distribution'] ?? $defaultResponse['result']['stats'],
+                    'accuracy' => $apiResult['metrics']['accuracy'] ?? null,
+                    'confusion_matrix' => $apiResult['metrics']['confusion_matrix'] ?? null,
+                    'pie_chart' => $apiResult['visualizations']['pie_chart'] ?? null
                 ]
             ];
         } catch (\Exception $e) {
@@ -249,10 +268,6 @@ class SentimentController extends Controller
         }
     }
 
-    /**
-     * Generate CSV file from results
-     */
-    // In SentimentController.php
     public function generateResultsCsv(array $data): string
     {
         $headers = [
@@ -260,8 +275,10 @@ class SentimentController extends Controller
             'Original Text',
             'Cleaned Text',
             'NaiveBayes Prediction',
+            'NaiveBayes Confidence',
             'NaiveBayes Emoji',
             'KNN Prediction',
+            'KNN Confidence',
             'KNN Emoji'
         ];
 
@@ -269,14 +286,16 @@ class SentimentController extends Controller
 
         foreach ($data as $row) {
             $csvContent .= sprintf(
-                '"%s","%s","%s","%s","%s","%s","%s"' . "\n",
+                '"%s","%s","%s","%s",%.2f,"%s","%s",%.2f,"%s"' . "\n",
                 str_replace('"', '""', $row['username'] ?? ''),
                 str_replace('"', '""', $row['text'] ?? ''),
                 str_replace('"', '""', $row['cleaned_text'] ?? ''),
-                $row['NaiveBayes']['prediction'] ?? '',
-                $row['NaiveBayes']['emoji'] ?? '',
-                $row['KNN']['prediction'] ?? '',
-                $row['KNN']['emoji'] ?? ''
+                $row['predictions']['NaiveBayes']['prediction'] ?? '',
+                $row['predictions']['NaiveBayes']['confidence'] ?? 0,
+                $row['predictions']['NaiveBayes']['emoji'] ?? '',
+                $row['predictions']['KNN']['prediction'] ?? '',
+                $row['predictions']['KNN']['confidence'] ?? 0,
+                $row['predictions']['KNN']['emoji'] ?? ''
             );
         }
 
