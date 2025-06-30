@@ -1,29 +1,29 @@
 @extends('layouts.app')
 
 @section('content')
-<div class="min-h-screen bg-gray-50 py-12 px-4 sm:px-6 lg:px-8">
+<div class="min-h-screen bg-gradient-to-br from-slate-900 via-blue-900 to-indigo-900 py-12 px-4 sm:px-6 lg:px-8 text-white">
   <div class="max-w-4xl mx-auto">
     <div class="text-center mb-8">
-      <h1 class="text-3xl font-bold text-gray-900 mb-2">Upload CSV Analisis Sentimen</h1>
-      <p class="text-gray-600">Upload file CSV untuk analisis sentimen batch</p>
+      <h1 class="text-3xl font-bold text-white mb-2">Upload CSV Analisis Sentimen</h1>
+      <p class="text-slate-300">Upload file CSV untuk analisis sentimen batch</p>
     </div>
 
-    <div class="bg-white shadow rounded-lg overflow-hidden">
-      <div class="p-6 border-b border-gray-200 bg-blue-600">
-        <h2 class="text-lg font-medium text-white">Upload File CSV</h2>
+    <div class="bg-white/5 backdrop-blur-sm rounded-xl border border-white/10 shadow-lg overflow-hidden">
+      <div class="p-6 border-b border-white/10 bg-gradient-to-r from-cyan-600 to-blue-600">
+        <h2 class="text-lg font-medium">Upload File CSV</h2>
       </div>
 
       <div class="p-6">
         @if (session('error'))
-        <div class="mb-4 p-4 rounded-md bg-red-50 border-l-4 border-red-500">
+        <div class="mb-4 p-4 rounded-lg bg-red-900/50 border-l-4 border-red-400 text-red-200">
           <div class="flex">
             <div class="flex-shrink-0">
-              <svg class="h-5 w-5 text-red-500" fill="currentColor" viewBox="0 0 20 20">
+              <svg class="h-5 w-5 text-red-400" fill="currentColor" viewBox="0 0 20 20">
                 <path fill-rule="evenodd" d="M10 18a8 8 0 100-16 8 8 0 000 16zM8.707 7.293a1 1 0 00-1.414 1.414L8.586 10l-1.293 1.293a1 1 0 101.414 1.414L10 11.414l1.293 1.293a1 1 0 001.414-1.414L11.414 10l1.293-1.293a1 1 0 00-1.414-1.414L10 8.586 8.707 7.293z" clip-rule="evenodd"></path>
               </svg>
             </div>
             <div class="ml-3">
-              <p class="text-sm text-red-700">{{ session('error') }}</p>
+              <p class="text-sm">{{ session('error') }}</p>
             </div>
           </div>
         </div>
@@ -33,24 +33,24 @@
           @csrf
 
           <div>
-            <label class="block text-sm font-medium text-gray-700 mb-2">
+            <label class="block text-sm font-medium text-slate-300 mb-2">
               Pilih File CSV
             </label>
 
             <!-- Drag and drop area -->
-            <div id="drop-area" class="mt-1 flex justify-center px-6 pt-5 pb-6 border-2 border-gray-300 border-dashed rounded-md transition-colors hover:border-blue-500">
+            <div id="drop-area" class="mt-1 flex justify-center px-6 pt-5 pb-6 border-2 border-white/20 border-dashed rounded-xl transition-colors hover:border-cyan-400 bg-white/5">
               <div class="space-y-1 text-center">
-                <svg class="mx-auto h-12 w-12 text-gray-400" stroke="currentColor" fill="none" viewBox="0 0 48 48" aria-hidden="true">
+                <svg class="mx-auto h-12 w-12 text-slate-400" stroke="currentColor" fill="none" viewBox="0 0 48 48" aria-hidden="true">
                   <path d="M28 8H12a4 4 0 00-4 4v20m32-12v8m0 0v8a4 4 0 01-4 4H12a4 4 0 01-4-4v-4m32-4l-3.172-3.172a4 4 0 00-5.656 0L28 28M8 32l9.172-9.172a4 4 0 015.656 0L28 28m0 0l4 4m4-24h8m-4-4v8m-12 4h.02" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"></path>
                 </svg>
-                <div class="flex text-sm text-gray-600">
-                  <label for="csv_file" class="relative cursor-pointer bg-white rounded-md font-medium text-blue-600 hover:text-blue-500 focus-within:outline-none">
+                <div class="flex text-sm text-slate-300">
+                  <label for="csv_file" class="relative cursor-pointer bg-white/5 rounded-lg font-medium text-cyan-400 hover:text-cyan-300 focus-within:outline-none">
                     <span>Upload file</span>
                     <input id="csv_file" name="csv_file" type="file" class="sr-only" accept=".csv" required>
                   </label>
                   <p class="pl-1">atau drag and drop</p>
                 </div>
-                <p class="text-xs text-gray-500">
+                <p class="text-xs text-slate-400">
                   CSV dengan kolom username dan text (Maks. 2MB)
                 </p>
               </div>
@@ -59,12 +59,12 @@
             <!-- File preview -->
             <div id="file-preview" class="mt-4 hidden">
               <div class="flex items-center">
-                <svg class="h-8 w-8 text-blue-500" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+                <svg class="h-8 w-8 text-cyan-400" fill="none" viewBox="0 0 24 24" stroke="currentColor">
                   <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M9 12h6m-6 4h6m2 5H7a2 2 0 01-2-2V5a2 2 0 012-2h5.586a1 1 0 01.707.293l5.414 5.414a1 1 0 01.293.707V19a2 2 0 01-2 2z"></path>
                 </svg>
                 <div class="ml-2">
-                  <p id="file-name" class="text-sm font-medium text-gray-900"></p>
-                  <p id="file-size" class="text-xs text-gray-500"></p>
+                  <p id="file-name" class="text-sm font-medium text-white"></p>
+                  <p id="file-size" class="text-xs text-slate-400"></p>
                 </div>
               </div>
             </div>
@@ -72,25 +72,25 @@
 
           <!-- CSV preview table -->
           <div id="csv-preview" class="hidden">
-            <h3 class="text-sm font-medium text-gray-900 mb-3">Preview Data (5 baris pertama)</h3>
-            <div class="overflow-x-auto border border-gray-200 rounded-lg">
-              <table class="min-w-full divide-y divide-gray-200">
-                <thead class="bg-gray-50">
+            <h3 class="text-sm font-medium text-white mb-3">Preview Data (5 baris pertama)</h3>
+            <div class="overflow-x-auto border border-white/10 rounded-lg">
+              <table class="min-w-full divide-y divide-white/10">
+                <thead class="bg-white/5">
                   <tr>
-                    <th scope="col" class="px-4 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">USERNAME</th>
-                    <th scope="col" class="px-4 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">TEXT</th>
+                    <th scope="col" class="px-4 py-3 text-left text-xs font-medium text-slate-300 uppercase tracking-wider">USERNAME</th>
+                    <th scope="col" class="px-4 py-3 text-left text-xs font-medium text-slate-300 uppercase tracking-wider">TEXT</th>
                   </tr>
                 </thead>
-                <tbody id="preview-table-body" class="bg-white divide-y divide-gray-200"></tbody>
+                <tbody id="preview-table-body" class="bg-white/5 divide-y divide-white/10 text-white"></tbody>
               </table>
             </div>
           </div>
 
           <div class="flex justify-between pt-4">
-            <a href="{{ route('form') }}" class="inline-flex items-center px-4 py-2 border border-gray-300 shadow-sm text-sm font-medium rounded-md text-gray-700 bg-white hover:bg-gray-50 focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-blue-500 transition-colors">
+            <a href="{{ route('form') }}" class="inline-flex items-center px-4 py-2 border border-white/20 text-sm font-medium rounded-lg text-white bg-white/5 hover:bg-white/10 focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-blue-500 transition-colors">
               Kembali
             </a>
-            <button type="submit" id="submit-btn" disabled class="inline-flex items-center px-4 py-2 border border-transparent text-sm font-medium rounded-md shadow-sm text-white bg-blue-600 hover:bg-blue-700 focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-blue-500 transition-colors disabled:opacity-50 disabled:cursor-not-allowed">
+            <button type="submit" id="submit-btn" disabled class="inline-flex items-center px-4 py-2 border border-transparent text-sm font-medium rounded-lg shadow-sm text-white bg-gradient-to-r from-cyan-500 to-blue-600 hover:from-cyan-600 hover:to-blue-700 focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-blue-500 transition-colors disabled:opacity-50 disabled:cursor-not-allowed">
               <span id="submit-text">Proses Analisis</span>
               <span id="loading-spinner" class="hidden ml-2">
                 <svg class="animate-spin h-4 w-4 text-white" xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24">
@@ -204,7 +204,7 @@
         const allLines = contents.split('\n');
         const headerLine = allLines[0];
         const dataLines = allLines.slice(1, 6); // Get up to 5 data rows
-        
+
         // Parse header to find column indices
         const headers = parseCSVLine(headerLine);
         const usernameIndex = headers.findIndex(h => h.trim().toLowerCase() === 'username');
@@ -226,13 +226,13 @@
 
             // Username column
             const usernameCell = document.createElement('td');
-            usernameCell.className = 'px-4 py-3 whitespace-nowrap text-sm text-gray-900';
+            usernameCell.className = 'px-4 py-3 whitespace-nowrap text-sm text-white';
             usernameCell.textContent = values[usernameIndex].trim();
             row.appendChild(usernameCell);
 
             // Text column
             const textCell = document.createElement('td');
-            textCell.className = 'px-4 py-3 text-sm text-gray-900';
+            textCell.className = 'px-4 py-3 text-sm text-white';
             textCell.textContent = values[textIndex].trim();
             row.appendChild(textCell);
 

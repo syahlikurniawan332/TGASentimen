@@ -270,32 +270,40 @@ class SentimentController extends Controller
 
     public function generateResultsCsv(array $data): string
     {
+        // Header kolom yang diinginkan
         $headers = [
             'Username',
             'Original Text',
             'Cleaned Text',
             'NaiveBayes Prediction',
             'NaiveBayes Confidence',
-            'NaiveBayes Emoji',
             'KNN Prediction',
-            'KNN Confidence',
-            'KNN Emoji'
+            'KNN Confidence'
         ];
 
+        // Membuat header CSV
         $csvContent = implode(',', $headers) . "\n";
 
         foreach ($data as $row) {
+            // Format confidence sebagai persentase dengan 2 desimal
+            $nbConfidence = isset($row['predictions']['NaiveBayes']['confidence'])
+                ? number_format($row['predictions']['NaiveBayes']['confidence'] * 100, 2) . '%'
+                : '0%';
+
+            $knnConfidence = isset($row['predictions']['KNN']['confidence'])
+                ? number_format($row['predictions']['KNN']['confidence'] * 100, 2) . '%'
+                : '0%';
+
+            // Membuat baris CSV
             $csvContent .= sprintf(
-                '"%s","%s","%s","%s",%.2f,"%s","%s",%.2f,"%s"' . "\n",
+                '"%s","%s","%s","%s","%s","%s","%s"' . "\n",
                 str_replace('"', '""', $row['username'] ?? ''),
                 str_replace('"', '""', $row['text'] ?? ''),
                 str_replace('"', '""', $row['cleaned_text'] ?? ''),
                 $row['predictions']['NaiveBayes']['prediction'] ?? '',
-                $row['predictions']['NaiveBayes']['confidence'] ?? 0,
-                $row['predictions']['NaiveBayes']['emoji'] ?? '',
+                $nbConfidence,
                 $row['predictions']['KNN']['prediction'] ?? '',
-                $row['predictions']['KNN']['confidence'] ?? 0,
-                $row['predictions']['KNN']['emoji'] ?? ''
+                $knnConfidence
             );
         }
 

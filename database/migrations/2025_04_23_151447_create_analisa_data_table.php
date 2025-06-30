@@ -16,6 +16,7 @@ return new class extends Migration
             $table->enum('tipe_fitur', ['text', 'file']);
             $table->string('nama_file')->nullable(); 
             $table->timestamp('waktu_analisis');
+            $table->boolean('has_ground_truth')->default(false);
             $table->timestamps();
         });
     }

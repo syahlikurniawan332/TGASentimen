@@ -15,7 +15,8 @@ class AnalisaData extends Model
     protected $fillable = [
         'tipe_fitur',
         'nama_file',
-        'waktu_analisis'
+        'waktu_analisis',
+        'has_ground_truth',
     ];
     
     protected $casts = [
