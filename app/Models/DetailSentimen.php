@@ -17,9 +17,9 @@ class DetailSentimen extends Model
         'username',
         'text_asli',
         'text_bersih',
-        'label_sentimen',
         'nb_prediksi',
-        'knn_prediksi'
+        'knn_prediksi',
+        'true_label',
     ];
     
     // Relasi ke analisa data

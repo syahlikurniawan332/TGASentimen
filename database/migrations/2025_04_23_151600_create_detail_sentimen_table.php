@@ -17,9 +17,9 @@ return new class extends Migration
             $table->string('username')->nullable();
             $table->text('text_asli');
             $table->text('text_bersih');
-            $table->string('label_sentimen')->nullable();
             $table->string('nb_prediksi')->nullable();
             $table->string('knn_prediksi')->nullable();
+            $table->string('true_label')->nullable();
             $table->timestamps();
         });
     }

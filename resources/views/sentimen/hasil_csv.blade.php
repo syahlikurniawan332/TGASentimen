@@ -46,11 +46,7 @@
             <div class="bg-white/5 backdrop-blur-xs rounded-xl border border-white/10 hover:border-cyan-400/30 transition-all">
                 <div class="px-4 py-5 sm:p-6">
                     <div class="flex items-center">
-                        <div class="flex-shrink-0 bg-cyan-500/10 rounded-md p-3">
-                            <svg class="h-6 w-6 text-cyan-400" xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24" stroke="currentColor">
-                                <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M9 19v-6a2 2 0 00-2-2H5a2 2 0 00-2 2v6a2 2 0 002 2h2a2 2 0 002-2zm0 0V9a2 2 0 012-2h2a2 2 0 012 2v10m-6 0a2 2 0 002 2h2a2 2 0 002-2m0 0V5a2 2 0 012-2h2a2 2 0 012 2v14a2 2 0 01-2 2h-2a2 2 0 01-2-2z" />
-                            </svg>
-                        </div>
+                        <!-- ... -->
                         <div class="ml-5 w-0 flex-1">
                             <dl>
                                 <dt class="text-sm font-medium text-slate-300 truncate">Naive Bayes</dt>
@@ -65,11 +61,15 @@
                     <div class="mt-4 grid grid-cols-2 gap-4">
                         <div class="bg-green-900/20 p-3 rounded-lg border border-green-400/20">
                             <p class="text-sm font-medium text-green-400">Positif</p>
-                            <p class="text-xl font-bold text-green-300">{{ $sentimentDistribution['NaiveBayes']['Positif'] ?? 0 }}</p>
+                            <p class="text-xl font-bold text-green-300">
+                                {{ $sentimentDistribution['NaiveBayes']['Positif'] ?? 0 }}
+                            </p>
                         </div>
                         <div class="bg-red-900/20 p-3 rounded-lg border border-red-400/20">
                             <p class="text-sm font-medium text-red-400">Negatif</p>
-                            <p class="text-xl font-bold text-red-300">{{ $sentimentDistribution['NaiveBayes']['Negatif'] ?? 0 }}</p>
+                            <p class="text-xl font-bold text-red-300">
+                                {{ $sentimentDistribution['NaiveBayes']['Negatif'] ?? 0 }}
+                            </p>
                         </div>
                     </div>
                 </div>
@@ -140,40 +140,33 @@
         <div class="mb-8">
             <h2 class="text-xl font-bold mb-4">Visualisasi Data</h2>
 
-            <!-- First Row of Visualizations -->
-            <div class="grid grid-cols-1 lg:grid-cols-2 gap-6 mb-6">
+            <!-- Pie Chart -->
+            <div class="grid grid-cols-1 gap-6 mb-6">
                 @if(isset($visualizations['pie_chart']))
                 <div class="bg-white/5 backdrop-blur-sm rounded-xl border border-white/10">
                     <div class="px-4 py-5 sm:px-6 border-b border-white/10">
                         <h3 class="text-lg font-medium">Distribusi Sentimen</h3>
                     </div>
                     <div class="px-4 py-5 sm:p-6 flex justify-center">
-                        <img src="data:image/png;base64,{{ $visualizations['pie_chart'] }}" alt="Pie Chart Sentimen" class="max-w-full h-auto rounded-lg">
-                    </div>
-                </div>
-                @endif
-
-                @if(isset($visualizations['confusion_heatmap']))
-                <div class="bg-white/5 backdrop-blur-sm rounded-xl border border-white/10">
-                    <div class="px-4 py-5 sm:px-6 border-b border-white/10">
-                        <h3 class="text-lg font-medium">Confusion Matrix</h3>
-                    </div>
-                    <div class="px-4 py-5 sm:p-6 flex justify-center">
-                        <img src="data:image/png;base64,{{ $visualizations['confusion_heatmap'] }}" alt="Confusion Matrix" class="max-w-full h-auto rounded-lg">
+                        <img src="data:image/png;base64,{{ $visualizations['pie_chart'] }}"
+                            alt="Pie Chart Sentimen"
+                            class="max-w-full h-auto rounded-lg">
                     </div>
                 </div>
                 @endif
             </div>
 
-            <!-- Second Row of Visualizations -->
-            <div class="grid grid-cols-1 lg:grid-cols-2 gap-6">
+            <!-- Wordclouds -->
+            <div class="grid grid-cols-1 lg:grid-cols-2 gap-6 mb-6">
                 @if(isset($visualizations['wordcloud_original']))
                 <div class="bg-white/5 backdrop-blur-sm rounded-xl border border-white/10">
                     <div class="px-4 py-5 sm:px-6 border-b border-white/10">
                         <h3 class="text-lg font-medium">Word Cloud Teks Asli</h3>
                     </div>
                     <div class="px-4 py-5 sm:p-6 flex justify-center">
-                        <img src="data:image/png;base64,{{ $visualizations['wordcloud_original'] }}" alt="Word Cloud Original" class="max-w-full h-auto rounded-lg">
+                        <img src="data:image/png;base64,{{ $visualizations['wordcloud_original'] }}"
+                            alt="Word Cloud Original"
+                            class="max-w-full h-auto rounded-lg">
                     </div>
                 </div>
                 @endif
@@ -184,193 +177,351 @@
                         <h3 class="text-lg font-medium">Word Cloud Teks Bersih</h3>
                     </div>
                     <div class="px-4 py-5 sm:p-6 flex justify-center">
-                        <img src="data:image/png;base64,{{ $visualizations['wordcloud_cleaned'] }}" alt="Word Cloud Cleaned" class="max-w-full h-auto rounded-lg">
+                        <img src="data:image/png;base64,{{ $visualizations['wordcloud_cleaned'] }}"
+                            alt="Word Cloud Cleaned"
+                            class="max-w-full h-auto rounded-lg">
                     </div>
                 </div>
                 @endif
             </div>
-        </div>
 
-        <!-- Word Frequency Section -->
-        @if(isset($wordFrequency))
-        <div class="bg-white/5 backdrop-blur-sm rounded-xl border border-white/10 mb-8">
-            <div class="px-6 py-5 border-b border-white/10">
-                <h3 class="text-lg font-medium">Frekuensi Kata</h3>
-                <p class="mt-1 text-sm text-slate-400">Kata-kata yang paling sering muncul dalam analisis</p>
-            </div>
+            <!-- Word Frequency Section -->
+            @if(isset($wordFrequency['raw_data']))
+            <div class="bg-white/5 backdrop-blur-sm rounded-xl border border-white/10 mb-8">
+                <div class="px-6 py-5 border-b border-white/10">
+                    <h3 class="text-lg font-medium">Frekuensi Kata</h3>
+                </div>
 
-            <div class="px-6 py-5">
-                <div class="grid grid-cols-1 md:grid-cols-2 gap-8">
-                    <!-- Naive Bayes Word Frequency -->
+                <div class="px-6 py-5 grid grid-cols-1 md:grid-cols-2 gap-8">
+                    <!-- Naive Bayes -->
                     <div class="bg-white/5 p-4 rounded-lg border border-white/10">
-                        <h4 class="text-lg font-medium mb-4 text-center">
-                            Distribusi Kata - Naive Bayes
-                        </h4>
-                        @if($wordFrequency['NaiveBayes'] && Str::startsWith($wordFrequency['NaiveBayes'], 'iVBOR'))
-                        <div class="flex justify-center">
+                        <h4 class="text-lg font-medium mb-4 text-center">Naive Bayes</h4>
+
+                        @if(isset($wordFrequency['NaiveBayes']) && Str::startsWith($wordFrequency['NaiveBayes'], 'iVBOR'))
+                        <div class="flex justify-center mb-6">
                             <img src="data:image/png;base64,{{ $wordFrequency['NaiveBayes'] }}"
-                                alt="Word Frequency Naive Bayes"
-                                class="w-full h-auto max-w-lg border border-white/10 rounded-lg">
-                        </div>
-                        @else
-                        <div class="text-center py-8 bg-white/5 rounded">
-                            <p class="text-slate-400">Visualisasi frekuensi kata tidak tersedia</p>
+                                class="w-full h-auto border border-white/10 rounded-lg">
                         </div>
                         @endif
 
-                        <!-- Raw Data Table -->
-                        @if(isset($wordFrequency['raw_data']['NaiveBayes']) && count($wordFrequency['raw_data']['NaiveBayes']) > 0)
-                        <div class="mt-6">
-                            <h5 class="font-medium text-slate-300 mb-2">Data Mentah (Top 10)</h5>
-                            <div class="overflow-x-auto">
-                                <table class="min-w-full divide-y divide-white/10">
-                                    <thead class="bg-white/5">
-                                        <tr>
-                                            <th class="px-4 py-2 text-left text-xs font-medium text-slate-400 uppercase">Kata</th>
-                                            <th class="px-4 py-2 text-left text-xs font-medium text-slate-400 uppercase">Frekuensi</th>
-                                        </tr>
-                                    </thead>
-                                    <tbody class="divide-y divide-white/10">
-                                        @foreach(array_slice($wordFrequency['raw_data']['NaiveBayes']['positif'], 0, 5) as $word => $count)
-                                        <tr>
-                                            <td class="px-4 py-2 text-sm text-green-400">{{ $word }}</td>
-                                            <td class="px-4 py-2 text-sm">{{ $count }}</td>
-                                        </tr>
-                                        @endforeach
-                                        @foreach(array_slice($wordFrequency['raw_data']['NaiveBayes']['negatif'], 0, 5) as $word => $count)
-                                        <tr>
-                                            <td class="px-4 py-2 text-sm text-red-400">{{ $word }}</td>
-                                            <td class="px-4 py-2 text-sm">{{ $count }}</td>
-                                        </tr>
-                                        @endforeach
-                                    </tbody>
-                                </table>
+                        <!-- Top 10 Positive Words -->
+                        <div class="mb-6">
+                            <h5 class="font-medium text-green-400 mb-2">Top 10 Kata Positif</h5>
+                            @if(isset($wordFrequency['raw_data']['NaiveBayes']['positif']) && count($wordFrequency['raw_data']['NaiveBayes']['positif']) > 0)
+                            <div class="space-y-1">
+                                @foreach(array_slice($wordFrequency['raw_data']['NaiveBayes']['positif'], 0, 10) as $word => $count)
+                                <div class="flex justify-between text-sm">
+                                    <span>{{ $word }}</span>
+                                    <span class="font-medium">{{ $count }}x</span>
+                                </div>
+                                @endforeach
                             </div>
+                            @else
+                            <p class="text-sm text-slate-400">Tidak ada data kata positif</p>
+                            @endif
                         </div>
-                        @endif
+
+                        <!-- Top 10 Negative Words -->
+                        <div>
+                            <h5 class="font-medium text-red-400 mb-2">Top 10 Kata Negatif</h5>
+                            @if(isset($wordFrequency['raw_data']['NaiveBayes']['negatif']) && count($wordFrequency['raw_data']['NaiveBayes']['negatif']) > 0)
+                            <div class="space-y-1">
+                                @foreach(array_slice($wordFrequency['raw_data']['NaiveBayes']['negatif'], 0, 10) as $word => $count)
+                                <div class="flex justify-between text-sm">
+                                    <span>{{ $word }}</span>
+                                    <span class="font-medium">{{ $count }}x</span>
+                                </div>
+                                @endforeach
+                            </div>
+                            @else
+                            <p class="text-sm text-slate-400">Tidak ada data kata negatif</p>
+                            @endif
+                        </div>
                     </div>
 
-                    <!-- KNN Word Frequency -->
+                    <!-- KNN -->
                     <div class="bg-white/5 p-4 rounded-lg border border-white/10">
-                        <h4 class="text-lg font-medium mb-4 text-center">
-                            Distribusi Kata - KNN
-                        </h4>
-                        @if($wordFrequency['KNN'] && Str::startsWith($wordFrequency['KNN'], 'iVBOR'))
-                        <div class="flex justify-center">
+                        <h4 class="text-lg font-medium mb-4 text-center">KNN</h4>
+
+                        @if(isset($wordFrequency['KNN']) && Str::startsWith($wordFrequency['KNN'], 'iVBOR'))
+                        <div class="flex justify-center mb-6">
                             <img src="data:image/png;base64,{{ $wordFrequency['KNN'] }}"
-                                alt="Word Frequency KNN"
-                                class="w-full h-auto max-w-lg border border-white/10 rounded-lg">
-                        </div>
-                        @else
-                        <div class="text-center py-8 bg-white/5 rounded">
-                            <p class="text-slate-400">Visualisasi frekuensi kata tidak tersedia</p>
+                                class="w-full h-auto border border-white/10 rounded-lg">
                         </div>
                         @endif
 
-                        <!-- Raw Data Table -->
-                        @if(isset($wordFrequency['raw_data']['KNN']) && count($wordFrequency['raw_data']['KNN']) > 0)
-                        <div class="mt-6">
-                            <h5 class="font-medium text-slate-300 mb-2">Data Mentah (Top 10)</h5>
-                            <div class="overflow-x-auto">
-                                <table class="min-w-full divide-y divide-white/10">
-                                    <thead class="bg-white/5">
-                                        <tr>
-                                            <th class="px-4 py-2 text-left text-xs font-medium text-slate-400 uppercase">Kata</th>
-                                            <th class="px-4 py-2 text-left text-xs font-medium text-slate-400 uppercase">Frekuensi</th>
-                                        </tr>
-                                    </thead>
-                                    <tbody class="divide-y divide-white/10">
-                                        @foreach(array_slice($wordFrequency['raw_data']['KNN']['positif'], 0, 5) as $word => $count)
-                                        <tr>
-                                            <td class="px-4 py-2 text-sm text-green-400">{{ $word }}</td>
-                                            <td class="px-4 py-2 text-sm">{{ $count }}</td>
-                                        </tr>
-                                        @endforeach
-                                        @foreach(array_slice($wordFrequency['raw_data']['KNN']['negatif'], 0, 5) as $word => $count)
-                                        <tr>
-                                            <td class="px-4 py-2 text-sm text-red-400">{{ $word }}</td>
-                                            <td class="px-4 py-2 text-sm">{{ $count }}</td>
-                                        </tr>
-                                        @endforeach
-                                    </tbody>
-                                </table>
+                        <!-- Top 10 Positive Words -->
+                        <div class="mb-6">
+                            <h5 class="font-medium text-green-400 mb-2">Top 10 Kata Positif</h5>
+                            @if(isset($wordFrequency['raw_data']['KNN']['positif']) && count($wordFrequency['raw_data']['KNN']['positif']) > 0)
+                            <div class="space-y-1">
+                                @foreach(array_slice($wordFrequency['raw_data']['KNN']['positif'], 0, 10) as $word => $count)
+                                <div class="flex justify-between text-sm">
+                                    <span>{{ $word }}</span>
+                                    <span class="font-medium">{{ $count }}x</span>
+                                </div>
+                                @endforeach
                             </div>
+                            @else
+                            <p class="text-sm text-slate-400">Tidak ada data kata positif</p>
+                            @endif
                         </div>
-                        @endif
+
+                        <!-- Top 10 Negative Words -->
+                        <div>
+                            <h5 class="font-medium text-red-400 mb-2">Top 10 Kata Negatif</h5>
+                            @if(isset($wordFrequency['raw_data']['KNN']['negatif']) && count($wordFrequency['raw_data']['KNN']['negatif']) > 0)
+                            <div class="space-y-1">
+                                @foreach(array_slice($wordFrequency['raw_data']['KNN']['negatif'], 0, 10) as $word => $count)
+                                <div class="flex justify-between text-sm">
+                                    <span>{{ $word }}</span>
+                                    <span class="font-medium">{{ $count }}x</span>
+                                </div>
+                                @endforeach
+                            </div>
+                            @else
+                            <p class="text-sm text-slate-400">Tidak ada data kata negatif</p>
+                            @endif
+                        </div>
                     </div>
                 </div>
             </div>
-        </div>
-        @endif
+            @endif
 
-        <!-- Results Table -->
-        <div class="bg-white/5 backdrop-blur-sm rounded-xl border border-white/10 mb-8">
-            <div class="px-4 py-5 sm:px-6 border-b border-white/10">
-                <div class="flex items-center justify-between">
-                    <h3 class="text-lg font-medium">Detail Analisis</h3>
-                    <span class="text-sm text-slate-400">
-                        Menampilkan {{ min(10, $totalData) }} dari {{ $totalData }} data
-                    </span>
+            @if(isset($modelEvaluation) && !empty($modelEvaluation['performance']))
+            <!-- Prediction Summary Section -->
+            <div class="bg-white/5 backdrop-blur-sm rounded-xl border border-white/10 mb-8">
+                <div class="px-6 py-5 border-b border-white/10">
+                    <h3 class="text-lg font-medium">Ringkasan Prediksi</h3>
+                    <p class="mt-1 text-sm text-slate-400">Perbandingan dengan label manual</p>
+                    <p class="mt-1 text-sm text-slate-400">
+                        Total Data: {{ $modelEvaluation['total_samples'] ?? 0 }} |
+                        Waktu Analisis: {{ now()->format('d M Y H:i') }}
+                    </p>
+                </div>
+
+                <!-- Confusion Matrix -->
+                @if(isset($visualizations['confusion_heatmap']))
+                <div class="px-6 py-5 border-b border-white/10">
+                    <h4 class="text-lg font-medium mb-4">Confusion Matrix</h4>
+                    <div class="flex justify-center">
+                        <img src="data:image/png;base64,{{ $visualizations['confusion_heatmap'] }}"
+                            class="max-w-full h-auto rounded-lg">
+                    </div>
+                </div>
+                @endif
+
+                <div class="px-6 py-5 grid grid-cols-1 md:grid-cols-2 gap-8">
+                    <!-- Naive Bayes -->
+                    <div class="bg-blue-900/20 p-6 rounded-lg border border-blue-400/20">
+                        <h4 class="text-xl font-bold mb-4 text-blue-300">Naive Bayes</h4>
+
+                        <!-- Correct Predictions -->
+                        <!-- Correct Predictions -->
+                        <div class="mb-6">
+                            <p class="text-sm text-purple-400">Prediksi Benar</p>
+                            <p class="text-3xl font-bold">
+                                {{ $modelEvaluation['performance']['NaiveBayes']['correct'] ?? 0 }}/{{ $modelEvaluation['total_samples'] ?? 0 }}
+                            </p>
+                            <p class="text-lg">
+                                ({{ $modelEvaluation['performance']['NaiveBayes']['correct'] && $modelEvaluation['total_samples'] ? 
+            round(($modelEvaluation['performance']['NaiveBayes']['correct'] / $modelEvaluation['total_samples']) * 100, 2) : 0 }}%)
+                            </p>
+                        </div>
+
+                        <!-- Performance Metrics -->
+                        <div>
+                            <p class="text-sm text-blue-400 mb-3">Metrik Performa</p>
+                            <div class="grid grid-cols-2 gap-4">
+                                <div class="bg-blue-900/10 p-3 rounded-lg">
+                                    <p class="text-xs text-blue-300">Akurasi</p>
+                                    <p class="text-xl font-bold">
+                                        {{ number_format($modelEvaluation['performance']['NaiveBayes']['accuracy'] * 100, 2) }}%
+                                    </p>
+                                </div>
+                                <div class="bg-blue-900/10 p-3 rounded-lg">
+                                    <p class="text-xs text-blue-300">Presisi</p>
+                                    <p class="text-xl font-bold">
+                                        {{ number_format($modelEvaluation['performance']['NaiveBayes']['precision'] * 100, 2) }}%
+                                    </p>
+                                </div>
+                                <div class="bg-blue-900/10 p-3 rounded-lg">
+                                    <p class="text-xs text-blue-300">Recall</p>
+                                    <p class="text-xl font-bold">
+                                        {{ number_format($modelEvaluation['performance']['NaiveBayes']['recall'] * 100, 2) }}%
+                                    </p>
+                                </div>
+                                <div class="bg-blue-900/10 p-3 rounded-lg">
+                                    <p class="text-xs text-blue-300">F1-Score</p>
+                                    <p class="text-xl font-bold">
+                                        {{ number_format($modelEvaluation['performance']['NaiveBayes']['f1_score'] * 100, 2) }}%
+                                    </p>
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+
+                    <!-- KNN -->
+                    <div class="bg-purple-900/20 p-6 rounded-lg border border-purple-400/20">
+                        <h4 class="text-xl font-bold mb-4 text-purple-300">KNN</h4>
+
+                        <!-- Correct Predictions -->
+                        <div class="mb-6">
+                            <p class="text-sm text-purple-400">Prediksi Benar</p>
+                            <p class="text-3xl font-bold">
+                                {{ $modelEvaluation['performance']['KNN']['correct'] ?? 0 }}/{{ $modelEvaluation['total_samples'] ?? 0 }}
+                            </p>
+                            <p class="text-lg">
+                                ({{ $modelEvaluation['performance']['KNN']['correct'] && $modelEvaluation['total_samples'] ? 
+            round(($modelEvaluation['performance']['KNN']['correct'] / $modelEvaluation['total_samples']) * 100, 2) : 0 }}%)
+                            </p>
+                        </div>
+
+                        <!-- Performance Metrics -->
+                        <div>
+                            <p class="text-sm text-purple-400 mb-3">Metrik Performa</p>
+                            <div class="grid grid-cols-2 gap-4">
+                                <div class="bg-purple-900/10 p-3 rounded-lg">
+                                    <p class="text-xs text-purple-300">Akurasi</p>
+                                    <p class="text-xl font-bold">
+                                        {{ number_format($modelEvaluation['performance']['KNN']['accuracy'] * 100, 2) }}%
+                                    </p>
+                                </div>
+                                <div class="bg-purple-900/10 p-3 rounded-lg">
+                                    <p class="text-xs text-purple-300">Presisi</p>
+                                    <p class="text-xl font-bold">
+                                        {{ number_format($modelEvaluation['performance']['KNN']['precision'] * 100, 2) }}%
+                                    </p>
+                                </div>
+                                <div class="bg-purple-900/10 p-3 rounded-lg">
+                                    <p class="text-xs text-purple-300">Recall</p>
+                                    <p class="text-xl font-bold">
+                                        {{ number_format($modelEvaluation['performance']['KNN']['recall'] * 100, 2) }}%
+                                    </p>
+                                </div>
+                                <div class="bg-purple-900/10 p-3 rounded-lg">
+                                    <p class="text-xs text-purple-300">F1-Score</p>
+                                    <p class="text-xl font-bold">
+                                        {{ number_format($modelEvaluation['performance']['KNN']['f1_score'] * 100, 2) }}%
+                                    </p>
+                                </div>
+                            </div>
+                        </div>
+                    </div>
                 </div>
             </div>
-            <div class="overflow-x-auto">
-                <table class="min-w-full divide-y divide-white/10">
-                    <thead class="bg-white/5">
-                        <tr>
-                            <th scope="col" class="px-6 py-3 text-left text-xs font-medium text-slate-400 uppercase tracking-wider">#</th>
-                            <th scope="col" class="px-6 py-3 text-left text-xs font-medium text-slate-400 uppercase tracking-wider">Username</th>
-                            <th scope="col" class="px-6 py-3 text-left text-xs font-medium text-slate-400 uppercase tracking-wider">Teks</th>
-                            <th scope="col" class="px-6 py-3 text-left text-xs font-medium text-slate-400 uppercase tracking-wider">Naive Bayes</th>
-                            <th scope="col" class="px-6 py-3 text-left text-xs font-medium text-slate-400 uppercase tracking-wider">KNN</th>
-                        </tr>
-                    </thead>
-                    <tbody class="divide-y divide-white/10">
-                        @foreach($displayData as $index => $item)
-                        <tr class="hover:bg-white/10 transition-colors">
-                            <td class="px-6 py-4 whitespace-nowrap text-sm font-medium">{{ $index + 1 }}</td>
-                            <td class="px-6 py-4 whitespace-nowrap text-sm text-slate-300">{{ $item['username'] ?? 'N/A' }}</td>
-                            <td class="px-6 py-4 text-sm text-slate-300 max-w-xs truncate" title="{{ $item['text'] }}">{{ Str::limit($item['text'], 100) }}</td>
-                            <td class="px-6 py-4 whitespace-nowrap">
-                                <div class="flex items-center">
-                                    <span class="text-xl mr-2">{{ $item['nb_emoji'] }}</span>
-                                    <div>
-                                        <div class="text-sm font-medium capitalize">{{ $item['nb_prediction'] }}</div>
-                                        <div class="text-xs text-slate-400">{{ round($item['nb_confidence'] * 100, 1) }}% confidence</div>
+            @endif
+
+            <!-- Results Table -->
+            <div class="bg-white/5 backdrop-blur-sm rounded-xl border border-white/10 mb-8">
+                <!-- ... bagian header tetap sama ... -->
+
+                <div class="overflow-x-auto">
+                    <table class="min-w-full divide-y divide-white/10">
+                        <thead class="bg-white/5">
+                            <tr>
+                                <th scope="col" class="px-6 py-3 text-left text-xs font-medium text-slate-400 uppercase tracking-wider">#</th>
+                                <th scope="col" class="px-6 py-3 text-left text-xs font-medium text-slate-400 uppercase tracking-wider">Username</th>
+                                <th scope="col" class="px-6 py-3 text-left text-xs font-medium text-slate-400 uppercase tracking-wider">Teks</th>
+                                @if($hasGroundTruth)
+                                <th scope="col" class="px-6 py-3 text-left text-xs font-medium text-slate-400 uppercase tracking-wider">Label Manual</th>
+                                <th scope="col" class="px-6 py-3 text-left text-xs font-medium text-slate-400 uppercase tracking-wider">Status NB</th>
+                                <th scope="col" class="px-6 py-3 text-left text-xs font-medium text-slate-400 uppercase tracking-wider">Status KNN</th>
+                                @endif
+                                <th scope="col" class="px-6 py-3 text-left text-xs font-medium text-slate-400 uppercase tracking-wider">Naive Bayes</th>
+                                <th scope="col" class="px-6 py-3 text-left text-xs font-medium text-slate-400 uppercase tracking-wider">KNN</th>
+                            </tr>
+                        </thead>
+
+                        <tbody class="divide-y divide-white/10">
+                            @foreach($displayData as $index => $item)
+                            <tr class="hover:bg-white/10">
+                                <td class="px-6 py-4 whitespace-nowrap text-sm">{{ $index + 1 }}</td>
+                                <td class="px-6 py-4 whitespace-nowrap text-sm">{{ $item['username'] ?? '-' }}</td>
+                                <td class="px-6 py-4 text-sm max-w-xs truncate" title="{{ $item['text'] }}">
+                                    {{ Str::limit($item['text'], 100) }}
+                                </td>
+
+                                @if($hasGroundTruth)
+                                <td class="px-6 py-4 whitespace-nowrap">
+                                    @if(isset($item['true_label']))
+                                    <span class="px-2 py-1 text-xs rounded-full 
+                {{ strtolower($item['true_label']) === 'positif' ? 'bg-green-900/20 text-green-400' : 'bg-red-900/20 text-red-400' }}">
+                                        {{ $item['true_label'] }}
+                                        @if(isset($item['true_emoji']))
+                                        {{ $item['true_emoji'] }}
+                                        @endif
+                                    </span>
+                                    @endif
+                                </td>
+
+                                <td class="px-6 py-4 whitespace-nowrap">
+                                    @php
+                                    $nbCorrect = isset($item['true_label']) && isset($item['nb_prediction']) &&
+                                    strtolower($item['nb_prediction']) === strtolower($item['true_label']);
+                                    @endphp
+                                    <span class="{{ $nbCorrect ? 'text-green-400' : 'text-red-400' }}">
+                                        {{ $nbCorrect ? '✔' : '✖' }}
+                                    </span>
+                                </td>
+
+                                <td class="px-6 py-4 whitespace-nowrap">
+                                    @php
+                                    $knnCorrect = isset($item['true_label']) && isset($item['knn_prediction']) &&
+                                    strtolower($item['knn_prediction']) === strtolower($item['true_label']);
+                                    @endphp
+                                    <span class="{{ $knnCorrect ? 'text-green-400' : 'text-red-400' }}">
+                                        {{ $knnCorrect ? '✔' : '✖' }}
+                                    </span>
+                                </td>
+                                @endif
+
+                                <td class="px-6 py-4 whitespace-nowrap">
+                                    <div class="flex items-center">
+                                        <span class="text-xl mr-2">{{ $item['nb_emoji'] ?? '' }}</span>
+                                        <div>
+                                            <div class="text-sm capitalize">{{ $item['nb_prediction'] ?? '' }}</div>
+                                            <div class="text-xs text-slate-400">
+                                                {{ isset($item['nb_confidence']) ? round($item['nb_confidence'] * 100, 1) : 0 }}%
+                                            </div>
+                                        </div>
                                     </div>
-                                </div>
-                            </td>
-                            <td class="px-6 py-4 whitespace-nowrap">
-                                <div class="flex items-center">
-                                    <span class="text-xl mr-2">{{ $item['knn_emoji'] }}</span>
-                                    <div>
-                                        <div class="text-sm font-medium capitalize">{{ $item['knn_prediction'] }}</div>
-                                        <div class="text-xs text-slate-400">{{ round($item['knn_confidence'] * 100, 1) }}% confidence</div>
+                                </td>
+
+                                <td class="px-6 py-4 whitespace-nowrap">
+                                    <div class="flex items-center">
+                                        <span class="text-xl mr-2">{{ $item['knn_emoji'] ?? '' }}</span>
+                                        <div>
+                                            <div class="text-sm capitalize">{{ $item['knn_prediction'] ?? '' }}</div>
+                                            <div class="text-xs text-slate-400">
+                                                {{ isset($item['knn_confidence']) ? round($item['knn_confidence'] * 100, 1) : 0 }}%
+                                            </div>
+                                        </div>
                                     </div>
-                                </div>
-                            </td>
-                        </tr>
-                        @endforeach
-                    </tbody>
-                </table>
+                                </td>
+                            </tr>
+                            @endforeach
+                        </tbody>
+                    </table>
+                </div>
+            </div>
+
+            <!-- Action Buttons -->
+            <div class="flex justify-between no-print">
+                <a href="{{ route('uploadCsvForm') }}" class="inline-flex items-center px-4 py-2 border border-white/20 text-sm font-medium rounded-lg text-white bg-white/5 hover:bg-white/10 focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-blue-500 transition-all">
+                    <svg class="-ml-1 mr-2 h-5 w-5" xmlns="http://www.w3.org/2000/svg" viewBox="0 0 20 20" fill="currentColor">
+                        <path fill-rule="evenodd" d="M9.707 16.707a1 1 0 01-1.414 0l-6-6a1 1 0 010-1.414l6-6a1 1 0 011.414 1.414L5.414 9H17a1 1 0 110 2H5.414l4.293 4.293a1 1 0 010 1.414z" clip-rule="evenodd" />
+                    </svg>
+                    Kembali
+                </a>
+                <button onclick="window.print()" class="print-button no-print inline-flex items-center px-4 py-2 border border-transparent text-sm font-medium rounded-lg shadow-sm text-white bg-gradient-to-r from-cyan-500 to-blue-600 hover:from-cyan-600 hover:to-blue-700 focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-blue-500 transition-all">
+                    <svg class="-ml-1 mr-2 h-5 w-5" xmlns="http://www.w3.org/2000/svg" viewBox="0 0 20 20" fill="currentColor">
+                        <path fill-rule="evenodd" d="M5 4v3H4a2 2 0 00-2 2v3a2 2 0 002 2h1v2a2 2 0 002 2h6a2 2 0 002-2v-2h1a2 2 0 002-2V9a2 2 0 00-2-2h-1V4a2 2 0 00-2-2H7a2 2 0 00-2 2zm8 0H7v3h6V4zm0 8H7v4h6v-4z" clip-rule="evenodd" />
+                    </svg>
+                    Cetak Hasil
+                </button>
             </div>
         </div>
-
-        <!-- Action Buttons -->
-        <div class="flex justify-between no-print">
-            <a href="{{ route('uploadCsvForm') }}" class="inline-flex items-center px-4 py-2 border border-white/20 text-sm font-medium rounded-lg text-white bg-white/5 hover:bg-white/10 focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-blue-500 transition-all">
-                <svg class="-ml-1 mr-2 h-5 w-5" xmlns="http://www.w3.org/2000/svg" viewBox="0 0 20 20" fill="currentColor">
-                    <path fill-rule="evenodd" d="M9.707 16.707a1 1 0 01-1.414 0l-6-6a1 1 0 010-1.414l6-6a1 1 0 011.414 1.414L5.414 9H17a1 1 0 110 2H5.414l4.293 4.293a1 1 0 010 1.414z" clip-rule="evenodd" />
-                </svg>
-                Kembali
-            </a>
-            <button onclick="window.print()" class="print-button no-print inline-flex items-center px-4 py-2 border border-transparent text-sm font-medium rounded-lg shadow-sm text-white bg-gradient-to-r from-cyan-500 to-blue-600 hover:from-cyan-600 hover:to-blue-700 focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-blue-500 transition-all">
-                <svg class="-ml-1 mr-2 h-5 w-5" xmlns="http://www.w3.org/2000/svg" viewBox="0 0 20 20" fill="currentColor">
-                    <path fill-rule="evenodd" d="M5 4v3H4a2 2 0 00-2 2v3a2 2 0 002 2h1v2a2 2 0 002 2h6a2 2 0 002-2v-2h1a2 2 0 002-2V9a2 2 0 00-2-2h-1V4a2 2 0 00-2-2H7a2 2 0 00-2 2zm8 0H7v3h6V4zm0 8H7v4h6v-4z" clip-rule="evenodd" />
-                </svg>
-                Cetak Hasil
-            </button>
-        </div>
-    </div>
 </section>
 
 
