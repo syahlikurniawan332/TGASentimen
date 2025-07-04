@@ -173,7 +173,7 @@ class SentimentController extends Controller
             $hasGroundTruth = false;
             $groundTruthKey = null;
 
-            // Cek semua kemungkinan format ground truth
+            // Proses deteksi ground truth (tetap seperti sebelumnya)
             $groundTruthFormats = [
                 'ground_truth.label' => fn($row) => $row['ground_truth']['label'] ?? null,
                 'ground_truth' => fn($row) => is_array($row['ground_truth']) ? null : $row['ground_truth'],
@@ -182,14 +182,12 @@ class SentimentController extends Controller
                 'sentiment' => fn($row) => $row['sentiment'] ?? null
             ];
 
-            // Coba deteksi format yang digunakan
             if (!empty($results)) {
                 foreach ($groundTruthFormats as $format => $extractor) {
                     $sampleValue = $extractor($results[0]);
                     if ($sampleValue !== null) {
                         $hasGroundTruth = true;
                         $groundTruthKey = $format;
-                        Log::debug("Detected ground truth format: {$format}");
                         break;
                     }
                 }
@@ -200,21 +198,13 @@ class SentimentController extends Controller
                 $trueLabel = null;
                 $trueEmoji = null;
 
-                if ($hasGroundTruth) {
-
+                if ($hasGroundTruth && $groundTruthKey) {
                     $extractor = $groundTruthFormats[$groundTruthKey] ?? null;
                     $trueLabel = $extractor ? $extractor($row) : null;
-
-                    if ($trueLabel !== null) {
-                        $trueEmoji = $this->getEmoji($trueLabel);
-                        Log::debug("Processed ground truth:", [
-                            'label' => $trueLabel,
-                            'emoji' => $trueEmoji,
-                            'format' => $groundTruthKey
-                        ]);
-                    }
+                    $trueEmoji = $this->getEmoji($trueLabel);
                 }
 
+                // Proses data prediksi tanpa tergantung ground truth
                 $processedData[] = [
                     'username' => $row['username'] ?? '',
                     'text' => $row['text'] ?? '',
@@ -230,7 +220,6 @@ class SentimentController extends Controller
                 ];
             }
 
-            // dd($processedData);
             return [
                 'data' => $processedData,
                 'displayData' => array_slice($processedData, 0, 10),
@@ -255,7 +244,6 @@ class SentimentController extends Controller
             return $defaultResponse;
         }
     }
-
     protected function saveTextAnalysis(array $textLines, array $result): AnalisaData
     {
         $analisa = AnalisaData::create([
