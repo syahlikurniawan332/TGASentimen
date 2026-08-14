@@ -221,12 +221,20 @@
                             @endif
                         </div>
 
+                        @php
+                        $positiveWords = array_slice(array_keys($wordFrequency['raw_data']['NaiveBayes']['positif'] ?? []), 0, 10);
+                        $filteredNegatives = array_filter(
+                        $wordFrequency['raw_data']['NaiveBayes']['negatif'] ?? [],
+                        fn($word) => !in_array($word, $positiveWords),
+                        ARRAY_FILTER_USE_KEY
+                        );
+                        @endphp
                         <!-- Top 10 Negative Words -->
                         <div>
                             <h5 class="font-medium text-red-400 mb-2">Top 10 Kata Negatif</h5>
                             @if(isset($wordFrequency['raw_data']['NaiveBayes']['negatif']) && count($wordFrequency['raw_data']['NaiveBayes']['negatif']) > 0)
                             <div class="space-y-1">
-                                @foreach(array_slice($wordFrequency['raw_data']['NaiveBayes']['negatif'], 0, 10) as $word => $count)
+                                @foreach(array_slice($filteredNegatives, 0, 10) as $word => $count)
                                 <div class="flex justify-between text-sm">
                                     <span>{{ $word }}</span>
                                     <span class="font-medium">{{ $count }}x</span>
@@ -251,11 +259,16 @@
                         @endif
 
                         <!-- Top 10 Positive Words -->
+                        @php
+                        $positifKNN = array_slice($wordFrequency['raw_data']['KNN']['positif'] ?? [], 0, 10);
+                        $positiveWordsKNN = array_keys($positifKNN);
+                        @endphp
+
                         <div class="mb-6">
                             <h5 class="font-medium text-green-400 mb-2">Top 10 Kata Positif</h5>
-                            @if(isset($wordFrequency['raw_data']['KNN']['positif']) && count($wordFrequency['raw_data']['KNN']['positif']) > 0)
+                            @if(count($positifKNN) > 0)
                             <div class="space-y-1">
-                                @foreach(array_slice($wordFrequency['raw_data']['KNN']['positif'], 0, 10) as $word => $count)
+                                @foreach($positifKNN as $word => $count)
                                 <div class="flex justify-between text-sm">
                                     <span>{{ $word }}</span>
                                     <span class="font-medium">{{ $count }}x</span>
@@ -268,11 +281,20 @@
                         </div>
 
                         <!-- Top 10 Negative Words -->
+                        @php
+                        $negatifKNN = $wordFrequency['raw_data']['KNN']['negatif'] ?? [];
+                        $filteredNegativeKNN = array_filter(
+                        $negatifKNN,
+                        fn($word) => !in_array($word, $positiveWordsKNN),
+                        ARRAY_FILTER_USE_KEY
+                        );
+                        @endphp
+
                         <div>
                             <h5 class="font-medium text-red-400 mb-2">Top 10 Kata Negatif</h5>
-                            @if(isset($wordFrequency['raw_data']['KNN']['negatif']) && count($wordFrequency['raw_data']['KNN']['negatif']) > 0)
+                            @if(count($filteredNegativeKNN) > 0)
                             <div class="space-y-1">
-                                @foreach(array_slice($wordFrequency['raw_data']['KNN']['negatif'], 0, 10) as $word => $count)
+                                @foreach(array_slice($filteredNegativeKNN, 0, 10) as $word => $count)
                                 <div class="flex justify-between text-sm">
                                     <span>{{ $word }}</span>
                                     <span class="font-medium">{{ $count }}x</span>
@@ -283,6 +305,7 @@
                             <p class="text-sm text-slate-400">Tidak ada data kata negatif</p>
                             @endif
                         </div>
+
                     </div>
                 </div>
             </div>
@@ -317,12 +340,11 @@
                         <h4 class="text-xl font-bold mb-4 text-blue-300">Naive Bayes</h4>
 
                         <!-- Correct Predictions -->
-                        <!-- Correct Predictions -->
                         <div class="mb-6">
                             <p class="text-sm text-purple-400">Prediksi Benar</p>
                             <p class="text-3xl font-bold">
                                 {{ $modelEvaluation['performance']['NaiveBayes']['correct'] ?? 0 }}/{{ $modelEvaluation['total_samples'] ?? 0 }}
-                            </p>
+                            Total data</p>
                             <p class="text-lg">
                                 ({{ $modelEvaluation['performance']['NaiveBayes']['correct'] && $modelEvaluation['total_samples'] ? 
             round(($modelEvaluation['performance']['NaiveBayes']['correct'] / $modelEvaluation['total_samples']) * 100, 2) : 0 }}%)
@@ -370,7 +392,7 @@
                             <p class="text-sm text-purple-400">Prediksi Benar</p>
                             <p class="text-3xl font-bold">
                                 {{ $modelEvaluation['performance']['KNN']['correct'] ?? 0 }}/{{ $modelEvaluation['total_samples'] ?? 0 }}
-                            </p>
+                            Total data</p>
                             <p class="text-lg">
                                 ({{ $modelEvaluation['performance']['KNN']['correct'] && $modelEvaluation['total_samples'] ? 
             round(($modelEvaluation['performance']['KNN']['correct'] / $modelEvaluation['total_samples']) * 100, 2) : 0 }}%)
@@ -424,7 +446,7 @@
                                 <th scope="col" class="px-6 py-3 text-left text-xs font-medium text-slate-400 uppercase tracking-wider">Username</th>
                                 <th scope="col" class="px-6 py-3 text-left text-xs font-medium text-slate-400 uppercase tracking-wider">Teks</th>
                                 @if($hasGroundTruth)
-                                <th scope="col" class="px-6 py-3 text-left text-xs font-medium text-slate-400 uppercase tracking-wider">Label Manual</th>
+                                <th scope="col" class="px-6 py-3 text-left text-xs font-medium text-slate-400 uppercase tracking-wider">Label Aktual</th>
                                 <th scope="col" class="px-6 py-3 text-left text-xs font-medium text-slate-400 uppercase tracking-wider">Status NB</th>
                                 <th scope="col" class="px-6 py-3 text-left text-xs font-medium text-slate-400 uppercase tracking-wider">Status KNN</th>
                                 @endif
