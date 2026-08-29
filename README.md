@@ -93,7 +93,7 @@ The application is publicly deployed and can be accessed here:
 
 The machine learning models and REST API are maintained in a separate repository.
 
-[Machine Learning Backend Repository](BACKEND_REPOSITORY_URL)
+[Machine Learning Backend Repository](https://github.com/syahlikurniawan332/APISentimen)
 
 ---
 
